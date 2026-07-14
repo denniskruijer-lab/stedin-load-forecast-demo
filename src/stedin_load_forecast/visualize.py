@@ -46,3 +46,26 @@ def plot_forecast_comparison(
 
     logger.info("Saved forecast comparison plot to %s", output_path)
     return output_path
+
+
+def plot_top_woonplaatsen(df: pd.DataFrame, output_path: Path) -> Path:
+    """Bar chart of average annual consumption (SJV) for the given woonplaatsen.
+
+    Expects columns "WOONPLAATS" and "avg_sjv_kwh", e.g. the output of
+    stedin_open_data.top_woonplaatsen_by_connections().
+    """
+    output_path = Path(output_path)
+    output_path.parent.mkdir(parents=True, exist_ok=True)
+
+    ordered = df.sort_values("avg_sjv_kwh", ascending=True)
+
+    fig, ax = plt.subplots(figsize=(9, 5))
+    ax.barh(ordered["WOONPLAATS"], ordered["avg_sjv_kwh"])
+    ax.set_xlabel("Average standard annual consumption (kWh)")
+    ax.set_title("Stedin open data: avg. electricity consumption, largest woonplaatsen")
+    fig.tight_layout()
+    fig.savefig(output_path, dpi=150)
+    plt.close(fig)
+
+    logger.info("Saved top-woonplaatsen chart to %s", output_path)
+    return output_path

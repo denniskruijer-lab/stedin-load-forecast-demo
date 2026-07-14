@@ -2,7 +2,7 @@
 
 Short-term electricity load forecasting, built as a small, production-minded demo for a Data Scientist interview at Stedin.
 
-**Status:** scaffolded, model and pipeline to be built 2026-07-14.
+**Status:** working end-to-end pipeline, built 2026-07-14.
 
 ## Problem
 
@@ -25,8 +25,11 @@ Stedin's Data Science team forecasts load over time on transport and distributio
 
 ```
 src/stedin_load_forecast/   # importable package — pipeline logic lives here, not in notebooks
+scripts/run_pipeline.py     # CLI entry point
 tests/                       # pytest suite
 .github/workflows/           # CI: lint + test on push
+docs/                        # example output images referenced in this README
+data/raw/                    # gitignored — cached downloads (Stedin open data)
 ```
 
 ## Setup & run
@@ -47,10 +50,18 @@ Run against live data on 2026-07-14 (30 days, NL):
 
 | | MAE (MW) | RMSE (MW) | MAPE |
 |---|---|---|---|
-| Naive baseline (yesterday) | 802.6 | 1095.4 | 26.1% |
-| Model (GradientBoosting) | **155.6** | **248.4** | **8.2%** |
+| Naive baseline (yesterday) | 779.3 | 1071.9 | 25.8% |
+| Model (GradientBoosting) | **159.6** | **258.7** | **8.7%** |
 
 ![Forecast vs actual](docs/forecast_comparison_example.png)
+
+### Stedin open-data chart
+
+The same run also produces a chart from Stedin's own published open data (average annual electricity consumption for the woonplaatsen with the most connections in the dataset):
+
+![Top woonplaatsen by average consumption](docs/top_woonplaatsen_example.png)
+
+To skip this step (e.g. to avoid the ~4MB download): `uv run python scripts/run_pipeline.py --skip-garnish`.
 
 ## Testing
 
