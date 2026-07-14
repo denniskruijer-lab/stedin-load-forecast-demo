@@ -36,9 +36,21 @@ Requires [`uv`](https://docs.astral.sh/uv/).
 ```
 uv sync --group dev
 uv run pytest
+uv run python scripts/run_pipeline.py --days 30
 ```
 
-(Pipeline entry point and full run instructions land in a later feature slice — see project structure above; the package currently only contains logging setup.)
+This fetches the last 30 days of NL load data, trains the model, evaluates it against the naive baseline, and writes `outputs/forecast_comparison.png`.
+
+### Example result
+
+Run against live data on 2026-07-14 (30 days, NL):
+
+| | MAE (MW) | RMSE (MW) | MAPE |
+|---|---|---|---|
+| Naive baseline (yesterday) | 802.6 | 1095.4 | 26.1% |
+| Model (GradientBoosting) | **155.6** | **248.4** | **8.2%** |
+
+![Forecast vs actual](docs/forecast_comparison_example.png)
 
 ## Testing
 
