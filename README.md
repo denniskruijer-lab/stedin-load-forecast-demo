@@ -73,6 +73,13 @@ pytest
 
 GitHub Actions runs lint and tests on every push. See `.github/workflows/`.
 
+## Logging
+
+`stedin_load_forecast.logging_config.configure_logging()` sets up two outputs:
+
+- **Console**: the full run narrative at INFO level.
+- **`logs/pipeline.log`** (gitignored): only WARNING and above — an at-a-glance record of problems, not a full transcript. Same severity hierarchy as Python's `logging` module: WARNING < ERROR < CRITICAL.
+
 ## Production next steps
 
 This demo intentionally stops short of a full production setup (no OTAP environments, no A/B testing infrastructure, no feature store) — those are discussed as part of the interview rather than simulated here, to keep the demo itself proportionate to what it's actually demonstrating.
