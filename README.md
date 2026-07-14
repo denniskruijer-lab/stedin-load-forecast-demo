@@ -15,7 +15,11 @@ Stedin's Data Science team forecasts load over time on transport and distributio
 
 ## Approach
 
-_To be filled in during the build: model choice, validation strategy, error metrics._
+- **Features:** calendar features (hour, day-of-week, weekend flag) and lag features (15min/1h/1day/1week back) — load is dominated by daily and weekly seasonality, so these carry most of the signal. See `stedin_load_forecast.features`.
+- **Baseline:** seasonal-naive — predict the same value as the same time one day ago (`lag_96`). Any real model needs to beat this to be worth the complexity.
+- **Model:** `GradientBoostingRegressor` (scikit-learn) on the feature set above. Chosen over a heavier time-series-specific approach (ARIMA, Prophet) because it's simpler to productionize, easy to extend with new features, and a standard, defensible choice for this class of problem.
+- **Validation:** chronological train/test split (no shuffling — this is time series, so no leaking future into the past). See `stedin_load_forecast.model.time_train_test_split`.
+- **Metrics:** MAE, RMSE, MAPE, always reported against the naive baseline for context.
 
 ## Project structure
 
