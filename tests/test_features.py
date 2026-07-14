@@ -1,6 +1,12 @@
 import pandas as pd
 
-from stedin_load_forecast.features import add_calendar_features, add_lag_features, build_features
+from stedin_load_forecast.features import (
+    add_calendar_features,
+    add_lag_features,
+    build_features,
+    feature_columns,
+    lag_feature_columns,
+)
 
 
 def _sample_series(n=10, freq="15min"):
@@ -45,3 +51,17 @@ def test_build_features_combines_calendar_and_lag_features():
     for col in ("hour", "day_of_week", "is_weekend", "lag_1", "lag_2"):
         assert col in out.columns
     assert len(out) == 8
+
+
+def test_lag_feature_columns_names_one_column_per_lag():
+    assert lag_feature_columns((1, 96, 672)) == ["lag_1", "lag_96", "lag_672"]
+
+
+def test_feature_columns_matches_build_features_output_exactly():
+    df = _sample_series(n=10)
+    lags = (1, 2)
+
+    out = build_features(df, target_col="load_mw", lags=lags)
+    engineered_columns = set(out.columns) - {"load_mw"}
+
+    assert engineered_columns == set(feature_columns(lags))
