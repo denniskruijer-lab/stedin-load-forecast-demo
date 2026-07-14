@@ -1,7 +1,28 @@
 """Shared logging setup for the pipeline.
 
 Call configure_logging() once, at the entry point (the CLI script or a
-notebook's first cell) — library modules just use logging.getLogger(__name__).
+notebook's first cell) — library modules never configure logging
+themselves, they just log through `logging.getLogger(__name__)`. That
+split (libraries log, only the entry point configures *how* those logs
+are shown) is standard practice: it means this package behaves whether
+it's run as a CLI, imported into someone else's script, or eventually
+wrapped in an Airflow task — the caller decides what happens to the logs,
+not the library.
+
+Two outputs, two different jobs:
+
+- **Console** (`StreamHandler`, no level of its own — inherits `level`,
+  default INFO): the full run narrative, for watching a run happen.
+- **File** (`FileHandler`, fixed at `file_level`, default WARNING): only
+  problems. Kept separate from the console stream so that scanning for
+  "did anything go wrong" doesn't mean grepping through hundreds of
+  routine INFO lines — the file *is* the alert list.
+
+Deliberately not a `RotatingFileHandler` or anything log-aggregation-aware:
+this is a single, short-lived CLI run, not a long-running service, so
+rotation/shipping would be complexity with no corresponding problem to
+solve here. If this pipeline ever became a scheduled job, that's the
+first thing to add — see the README's "Production next steps" section.
 """
 
 import logging
@@ -18,13 +39,25 @@ def configure_logging(
     log_file: Path | str | None = DEFAULT_LOG_FILE,
     file_level: int = logging.WARNING,
 ) -> None:
-    """Configure console + (optional) file logging.
+    """Set up console + (optional) file logging for the whole process.
 
-    The console shows the full run narrative at `level` (default INFO).
-    The log file only captures `file_level` and above (default WARNING) —
-    it's meant as an at-a-glance record of problems (WARNING/ERROR/
-    CRITICAL), not a full run transcript. Pass log_file=None to disable
-    file logging (e.g. in tests, to avoid writing into the repo).
+    Safe to call more than once (e.g. from multiple tests in the same
+    process) — `force=True` tells `logging.basicConfig` to discard any
+    handlers a previous call installed, rather than silently no-op'ing.
+    Without it, only the *first* call in a process would ever take
+    effect, which is exactly the kind of bug that's invisible until two
+    tests run in the same session and the second one's log level change
+    appears to do nothing.
+
+    Args:
+        level: Minimum severity shown on the console. Default INFO shows
+            the full run narrative; DEBUG would add step-by-step detail.
+        log_file: Where to write the WARNING+ log file. Pass None to
+            disable file output entirely — used by most tests, so running
+            the test suite doesn't scatter log files through the repo.
+        file_level: Minimum severity written to log_file. WARNING by
+            default, so the file only ever contains things worth a
+            human's attention.
     """
     handlers: list[logging.Handler] = [logging.StreamHandler()]
 
