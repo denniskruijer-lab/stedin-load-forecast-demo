@@ -10,6 +10,7 @@ dependencies = [
     "numpy>=1.26",
     "scikit-learn>=1.5",
     "matplotlib>=3.9",
+    "statsmodels>=0.14.6",
 ]
 
 [dependency-groups]

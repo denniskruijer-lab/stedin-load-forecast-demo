@@ -39,13 +39,18 @@ def plot_forecast_comparison(
     naive_pred: pd.Series,
     output_path: Path,
     attribution: str | None = None,
+    model_label: str = "Model",
+    title: str = "NL electricity load: forecast vs actual (test period)",
 ) -> Path:
-    """Line chart comparing actual load to the model's and the naive baseline's predictions.
+    """Line chart comparing actual load to a model's and the naive baseline's predictions.
 
     All three lines share one axis (rather than, say, plotting error over
     time) because the point of this chart is to make the model's edge
     visually obvious at a glance: the naive baseline visibly lags behind
-    sharp changes, the model tracks them.
+    sharp changes, the model tracks them. Generic enough to plot any
+    single model against the baseline (the pipeline uses it once for
+    GradientBoosting, once for SARIMA — model_label/title distinguish
+    the two rather than this function assuming which model it's plotting).
 
     Args:
         y_true: Actual load values over the test period.
@@ -55,6 +60,8 @@ def plot_forecast_comparison(
             created if missing.
         attribution: Optional data-source credit line, e.g.
             energy_charts.ATTRIBUTION, printed small in the corner.
+        model_label: Legend label for model_pred, e.g. "Model (SARIMA)".
+        title: Chart title.
 
     Returns:
         output_path, for convenient chaining.
@@ -64,7 +71,7 @@ def plot_forecast_comparison(
 
     fig, ax = plt.subplots(figsize=(12, 5))
     ax.plot(y_true.index, y_true.values, label="Actual", linewidth=1.5)
-    ax.plot(y_true.index, model_pred.values, label="Model (GradientBoosting)", linewidth=1)
+    ax.plot(y_true.index, model_pred.values, label=model_label, linewidth=1)
     ax.plot(
         y_true.index,
         naive_pred.values,
@@ -74,7 +81,7 @@ def plot_forecast_comparison(
     )
     ax.set_xlabel("Time")
     ax.set_ylabel("Load (MW)")
-    ax.set_title("NL electricity load: forecast vs actual (test period)")
+    ax.set_title(title)
     ax.legend()
     fig.autofmt_xdate()
     fig.tight_layout()
