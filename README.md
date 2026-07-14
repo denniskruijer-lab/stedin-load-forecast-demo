@@ -27,7 +27,14 @@ tests/                       # pytest suite
 
 ## Setup & run
 
-_To be filled in during the build._
+Requires [`uv`](https://docs.astral.sh/uv/).
+
+```
+uv sync --group dev
+uv run pytest
+```
+
+(Pipeline entry point and full run instructions land in a later feature slice — see project structure above; the package currently only contains logging setup.)
 
 ## Testing
 
