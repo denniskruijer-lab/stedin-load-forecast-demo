@@ -32,9 +32,17 @@ def test_run_pipeline_end_to_end_produces_metrics_and_plot(tmp_path):
 
     mock_fetch.assert_called_once_with(start="2026-06-01", end="2026-06-12", country="nl")
 
-    for metrics in (result.model_metrics, result.naive_metrics):
+    for metrics in (
+        result.model_metrics,
+        result.naive_metrics,
+        result.sarima_metrics,
+        result.sarima_naive_metrics,
+    ):
         assert set(metrics) == {"mae", "rmse", "mape"}
 
     assert len(result.y_true) == len(result.model_pred) == len(result.naive_pred)
     assert result.plot_path.exists()
     assert result.plot_path.stat().st_size > 0
+    assert result.sarima_plot_path.exists()
+    assert result.sarima_plot_path.stat().st_size > 0
+    assert result.sarima_plot_path != result.plot_path
