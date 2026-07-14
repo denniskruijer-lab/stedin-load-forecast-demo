@@ -1,6 +1,13 @@
 """CLI entry point: fetch load data, train, evaluate, and plot.
 
-Usage: uv run python scripts/run_pipeline.py [--days 30] [--country nl]
+This script is intentionally thin — it parses arguments, calls
+run_pipeline() (the one function that knows how to actually do the work,
+see stedin_load_forecast.pipeline), and prints the result. All logic
+lives in the importable package under src/, not here, so the same
+pipeline can be driven from a notebook, a test, or a future scheduled
+job without going through argparse.
+
+Usage: uv run python scripts/run_pipeline.py [--days 30] [--country nl] [--skip-garnish]
 """
 
 import argparse
@@ -9,6 +16,7 @@ from pathlib import Path
 
 from stedin_load_forecast.logging_config import configure_logging
 from stedin_load_forecast.pipeline import run_pipeline
+from stedin_load_forecast.stedin_open_data import ATTRIBUTION as STEDIN_ATTRIBUTION
 from stedin_load_forecast.stedin_open_data import (
     download_consumption_data,
     extract_consumption_csv,
@@ -19,12 +27,28 @@ from stedin_load_forecast.visualize import plot_top_woonplaatsen
 
 
 def run_garnish_chart(output_dir: Path, cache_dir: Path) -> Path:
-    """Download (if needed) and chart Stedin's own open consumption data."""
+    """Download (if needed), aggregate, and chart Stedin's own open consumption data.
+
+    Kept separate from run_pipeline() and skippable via --skip-garnish:
+    it's a supporting visual, not part of the forecasting result, and it
+    involves a ~4MB download that shouldn't be mandatory for every
+    iteration while developing the core pipeline.
+
+    Args:
+        output_dir: Where to save the chart PNG.
+        cache_dir: Where to cache the downloaded ZIP/CSV, so repeated runs
+            don't re-download ~4MB every time.
+
+    Returns:
+        Path to the saved chart.
+    """
     zip_path = download_consumption_data(cache_dir / "stedin_kleinverbruiksgegevens.zip")
     csv_path = extract_consumption_csv(zip_path, cache_dir)
     df = load_consumption_csv(csv_path)
     top = top_woonplaatsen_by_connections(df, n=10)
-    return plot_top_woonplaatsen(top, output_dir / "top_woonplaatsen.png")
+    return plot_top_woonplaatsen(
+        top, output_dir / "top_woonplaatsen.png", attribution=STEDIN_ATTRIBUTION
+    )
 
 
 def main() -> None:
