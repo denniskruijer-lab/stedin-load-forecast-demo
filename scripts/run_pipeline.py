@@ -71,17 +71,31 @@ def main() -> None:
 
     result = run_pipeline(start=start, end=end, country=args.country, output_dir=output_dir)
 
+    print("15-minute resolution, GradientBoosting vs naive baseline:")
     print(
-        f"Model    -> MAE: {result.model_metrics['mae']:.2f} MW  "
+        f"  Model    -> MAE: {result.model_metrics['mae']:.2f} MW  "
         f"RMSE: {result.model_metrics['rmse']:.2f} MW  "
         f"MAPE: {result.model_metrics['mape']:.2f}%"
     )
     print(
-        f"Baseline -> MAE: {result.naive_metrics['mae']:.2f} MW  "
+        f"  Baseline -> MAE: {result.naive_metrics['mae']:.2f} MW  "
         f"RMSE: {result.naive_metrics['rmse']:.2f} MW  "
         f"MAPE: {result.naive_metrics['mape']:.2f}%"
     )
-    print(f"Plot saved to {result.plot_path}")
+    print(f"  Plot saved to {result.plot_path}")
+
+    print("Hourly resolution, SARIMA vs naive baseline (fixed 48h horizon):")
+    print(
+        f"  Model    -> MAE: {result.sarima_metrics['mae']:.2f} MW  "
+        f"RMSE: {result.sarima_metrics['rmse']:.2f} MW  "
+        f"MAPE: {result.sarima_metrics['mape']:.2f}%"
+    )
+    print(
+        f"  Baseline -> MAE: {result.sarima_naive_metrics['mae']:.2f} MW  "
+        f"RMSE: {result.sarima_naive_metrics['rmse']:.2f} MW  "
+        f"MAPE: {result.sarima_naive_metrics['mape']:.2f}%"
+    )
+    print(f"  Plot saved to {result.sarima_plot_path}")
 
     if not args.skip_garnish:
         garnish_path = run_garnish_chart(output_dir, cache_dir=Path("data/raw"))
