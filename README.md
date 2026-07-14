@@ -10,7 +10,7 @@ Stedin's Data Science team forecasts load over time on transport and distributio
 
 ## Data
 
-- **Core:** hourly electricity load data from [energy-charts.info](https://energy-charts.info) (Fraunhofer ISE, public, no registration required).
+- **Core:** electricity load data for the Netherlands from [energy-charts.info](https://energy-charts.info) (Fraunhofer ISE), via the `public_power` endpoint's `"Load"` series — ~15-minute resolution, no registration required, CC BY 4.0. Fetched by `stedin_load_forecast.energy_charts.fetch_load()`.
 - **Context:** Stedin's own open consumption data ([stedin.net/zakelijk/open-data](https://www.stedin.net/zakelijk/open-data)), CC-BY 4.0, used for a supporting visual rather than as a forecasting target (it's yearly and postcode-aggregated, not a time series).
 
 ## Approach
